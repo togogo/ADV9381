@@ -26,17 +26,12 @@ designcensus2017 <- read_csv("./designcensus/DesignCensus2017_Data.csv")
 designcensus2019 <- read_csv("./designcensus/DesignCensus2019_RAW DATA.csv")
 ethnicity_census2019 <- read_xlsx("./designcensus/ethnicityCount.xlsx")
 
-#View(designcensus2019)
-
 #converting the state information into fips code
 designersFipsReady = mutate(designers, fips = fips(State))
 architectsFipsReady = mutate(architects, fips = fips(State))
 artistsFipsReady = mutate(artists, fips = fips(State))
 
-#print(designcensus2019[0,35])#checking column names...
-#ethnicity_census2019 <- select(designcensus2019, "I am:_2")
-#View(ethnicity_census2019)#this works!
-#View(ethnicity_census2019)
+View(designcensus2017)
 
 #######
 #######convert the data in to long type
@@ -45,7 +40,6 @@ artistsFipsReady = mutate(artists, fips = fips(State))
 #Designers
 earningsOrigCategories <- colnames(designersEarnings)
 earningsOrigCategories <- earningsOrigCategories[-1]#get rid of the "state" column
-#print(earningsOrigCategories)
 designersEarningsLong <- designersEarnings %>% gather(key = "earningscat", value = "earningsval",  earningsOrigCategories)
 
 #Architects
@@ -54,20 +48,83 @@ architectsEarningsLong <- architectsEarnings %>% gather(key = "earningscat", val
 #Artists
 artistsEarningsLong <- artistsEarnings %>% gather(key = "earningscat", value = "earningsval",  earningsOrigCategories)
 
-#Designers/Architects/Artists Residence 2006 - 2010
+
 earningscatLevels <- levels(factor(designersEarningsLong$earningscat))
 reorderedEarningsCatLevels <- factor(c( "No earnings", "$1 to $14,999", "$15,000 to $24,999", "$25,000 to $34,999", "$35,000 to $49,999", "$50,000 to $74,999", "$75,000 to $99,999", "$100,000 to $124,999", "$125,000 or more" ))
 designersEarningsLong$earningscat <- factor(designersEarningsLong$earningscat, levels = rev(reorderedEarningsCatLevels))
 
+#Designers/Architects/Artists Residence 2006 - 2010
 designerPlot <- plot_usmap(regions = "states", data = designersFipsReady, values = "Designers", color = "white") +  scale_fill_viridis(option = "viridis", direction = -1) + labs(title = "Designers by Residence 2006 - 2010")
 architectPlot <- plot_usmap(regions = "states", data = architectsFipsReady, values = "Architects", color = "white") +  scale_fill_viridis(option = "viridis", direction = -1) + labs(title = "Architects by Residence 2006 - 2010")
 artistPlot <- plot_usmap(regions = "states", data = artistsFipsReady, values = "Artists", color = "white") +  scale_fill_viridis(option = "viridis", direction = -1) + labs(title = "Artists by Residence 2006 - 2010")
 
 #Designers/Architects/Artists Earnings 2006 - 2010
-designersEarningsPlot <- ggplot(designersEarningsLong, aes(x = reorder(State , -earningsval), y = earningsval)) + geom_bar(stat = "identity", aes(fill = earningscat)) + coord_flip() + scale_fill_viridis_d() + theme_minimal() + ggtitle("Designers Earnings by Residence 2006 - 2010") + xlab("States") + ylab("People Count")
-designersEarningsPlotPercentage <- ggplot(designersEarningsLong, aes(x = reorder(State , -earningsval), y = earningsval)) + geom_bar(stat = "identity", aes(fill = earningscat), position = "fill") + coord_flip() + scale_fill_viridis_d() + theme_minimal() + ggtitle("Designers Earnings by Residence 2006 - 2010") + xlab("States") + ylab("People Count")
-architectsEarningsPlot <- ggplot(architectsEarningsLong, aes(x = reorder(State , -earningsval), y = earningsval)) + geom_bar(stat = "identity", aes(fill = earningscat)) + coord_flip() + scale_fill_viridis_d() + theme_minimal() + ggtitle("Architects Earnings by Residence 2006 - 2010") + xlab("States") + ylab("People Count")
-artistsEarningsPlot <- ggplot(artistsEarningsLong, aes(x = reorder(State , -earningsval), y = earningsval)) + geom_bar(stat = "identity", aes(fill = earningscat)) + coord_flip() + scale_fill_viridis_d() + theme_minimal() + ggtitle("Artists Earnings by Residence 2006 - 2010") + xlab("States") + ylab("People Count")
+earningscatLevels <- levels(factor(designersEarningsLong$earningscat))
+reorderedEarningsCatLevels <- factor(c( "No earnings", "$1 to $14,999", "$15,000 to $24,999", "$25,000 to $34,999", "$35,000 to $49,999", "$50,000 to $74,999", "$75,000 to $99,999", "$100,000 to $124,999", "$125,000 or more" ))
+designersEarningsLong$earningscat <- factor(designersEarningsLong$earningscat, levels = rev(reorderedEarningsCatLevels))
+
+earningsArchCatLevels <- levels(factor(architectsEarningsLong$earningscat))
+reorderedArchEarningsCatLevels <- factor(c( "No earnings", "$1 to $14,999", "$15,000 to $24,999", "$25,000 to $34,999", "$35,000 to $49,999", "$50,000 to $74,999", "$75,000 to $99,999", "$100,000 to $124,999", "$125,000 or more" ))
+architectsEarningsLong$earningscat <- factor(architectsEarningsLong$earningscat, levels = rev(reorderedArchEarningsCatLevels))
+
+earningsArtCatLevels <- levels(factor(artistsEarningsLong$earningscat))
+reorderedArtEarningsCatLevels <- factor(c( "No earnings", "$1 to $14,999", "$15,000 to $24,999", "$25,000 to $34,999", "$35,000 to $49,999", "$50,000 to $74,999", "$75,000 to $99,999", "$100,000 to $124,999", "$125,000 or more" ))
+artistsEarningsLong$earningscat <- factor(artistsEarningsLong$earningscat, levels = rev(reorderedArtEarningsCatLevels))
+
+#Desigers Numbers
+designersEarningsPlot <- ggplot(designersEarningsLong, aes(x = reorder(State , -earningsval), y = earningsval)) + 
+  geom_bar(stat = "identity", aes(fill = earningscat)) + 
+  coord_flip() + scale_fill_viridis_d() + 
+  theme_minimal() + 
+  ggtitle("Designers Earnings by Residence 2006 - 2010") + xlab("States") + ylab("People Count")
+
+#Designers Percentage
+designersEarningsPlotPercentage <- ggplot(designersEarningsLong, aes(x = reorder(State , -earningsval), y = earningsval)) + 
+  geom_bar(stat = "identity", aes(fill = earningscat), position = "fill") + 
+  coord_flip() + 
+  scale_fill_viridis_d() + 
+  theme_minimal() + 
+  ggtitle("Designers Earnings by Residence 2006 - 2010") + 
+  xlab("States") + 
+  ylab("People Percentage")
+
+#Architects Numbers
+architectsEarningsPlot <- ggplot(architectsEarningsLong, aes(x = reorder(State , -earningsval), y = earningsval)) + 
+  geom_bar(stat = "identity", aes(fill = earningscat)) + 
+  coord_flip() + 
+  scale_fill_viridis_d() + 
+  theme_minimal() + 
+  ggtitle("Architects Earnings by Residence 2006 - 2010") + 
+  xlab("States") + 
+  ylab("People Count")
+
+#Architects Percentage
+architectsEarningsPlotPercentage <- ggplot(architectsEarningsLong, aes(x = reorder(State , -earningsval), y = earningsval)) + 
+  geom_bar(stat = "identity", aes(fill = earningscat), position = "fill") + 
+  coord_flip() + 
+  scale_fill_viridis_d() + 
+  theme_minimal() + 
+  ggtitle("Architects Earnings by Residence 2006 - 2010") + 
+  xlab("States") + 
+  ylab("People Percentage")
+
+#Artists Numbers
+artistsEarningsPlot <- ggplot(artistsEarningsLong, aes(x = reorder(State , -earningsval), y = earningsval)) + 
+  geom_bar(stat = "identity", aes(fill = earningscat)) + 
+  coord_flip() + 
+  scale_fill_viridis_d() + 
+  theme_minimal() + 
+  ggtitle("Artists Earnings by Residence 2006 - 2010") + 
+  xlab("States") + ylab("People Count")
+
+#Artists Percentage
+artistsEarningsPlotPercentage <- ggplot(artistsEarningsLong, aes(x = reorder(State , -earningsval), y = earningsval)) + 
+  geom_bar(stat = "identity", aes(fill = earningscat), position = "fill") + 
+  coord_flip() + 
+  scale_fill_viridis_d() + 
+  theme_minimal() + 
+  ggtitle("Artists Earnings by Residence 2006 - 2010") + 
+  xlab("States") + ylab("People Percentage")
 
 #View(designersEarningsLong)
 
@@ -78,9 +135,11 @@ artistsEarningsPlot <- ggplot(artistsEarningsLong, aes(x = reorder(State , -earn
 
 ##EARNINGS PLOT
 #designersEarningsPlot
-designersEarningsPlotPercentage
+#designersEarningsPlotPercentage
+#architectsEarningsPlotPercentage
 #architectsEarningsPlot
-#artistsEarningsPlot
+artistsEarningsPlot
+#artistsEarningsPlotPercentage
 
 ##ETHNICITY PLOT
 #
@@ -145,13 +204,16 @@ situationWaffle <- waffle(situationCount_census2019/10, size= 0, rows = 20)
 #save the plots in PDF
 #ggsave(plot = artistPlot, width = 10, height = 10, dpi = 300, filename = "output.pdf")
 #ggsave(plot = architectPlot, width = 10, height = 10, dpi = 300, filename = "output.pdf")
+#ggsave(plot = designersEarningsPlot, width = 10, height = 10, dpi = 300, filename = "output.pdf")
 #ggsave(plot = architectsEarningsPlot, width = 10, height = 10, dpi = 300, filename = "output.pdf")
-#ggsave(plot = artistsEarningsPlot, width = 10, height = 10, dpi = 300, filename = "output.pdf")
+ggsave(plot = artistsEarningsPlot, width = 10, height = 10, dpi = 300, filename = "output.pdf")
 #ggsave(plot = ethnicityPlot, width = 15, height = 10, dpi = 300, filename = "output.pdf")
 #ggsave(plot = ethnicityChart, width = 15, height = 10, dpi = 300, filename = "output.pdf")
 #ggsave(plot = securityWaffle, width = 15, height = 10, dpi = 300, filename = "output.pdf")
 #ggsave(plot = situationWaffle, width = 15, height = 10, dpi = 300, filename = "output.pdf")
-ggsave(plot = designersEarningsPlotPercentage, width = 15, height = 10, dpi = 300, filename = "output.pdf")
+#ggsave(plot = designersEarningsPlotPercentage, width = 15, height = 10, dpi = 300, filename = "output.pdf")
+#ggsave(plot = architectsEarningsPlotPercentage, width = 15, height = 10, dpi = 300, filename = "output.pdf")
+#ggsave(plot = artistsEarningsPlotPercentage, width = 15, height = 10, dpi = 300, filename = "output.pdf")
 
 
 
